@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Recicla SJP: agenda de coleta seletiva, mapa de ecopontos, guia de descarte e projetos de economia circular em São José dos Pinhais (PR).">
+    <meta name="theme-color" content="#047857">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:title" content="Recicla SJP | Coleta Seletiva e Sustentabilidade">
+    <meta property="og:description" content="Descubra os dias de coleta, os ecopontos e o que reciclar em São José dos Pinhais.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E♻️%3C/text%3E%3C/svg%3E">
+    <script>document.documentElement.classList.add('js');</script>
+    <title>Recicla SJP | Coleta Seletiva e Sustentabilidade</title>
+    
+    <!-- Leaflet CSS & JS (com defer para não bloquear a renderização inicial) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Canvas Confetti -->
+    <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Estilos Minimalistas -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <a class="pular-conteudo" href="#principal">Pular para o conteúdo</a>
+
+    <!-- Barra Sutil de Progresso de Leitura -->
+    <div id="scroll-progress" aria-hidden="true"></div>
+
+    <!-- Navegação Minimalista -->
+    <nav class="navbar" role="navigation" aria-label="Navegação Principal">
+        <a href="#" class="logo">♻️ Recicla<strong>SJP</strong></a>
+        
+        <div class="nav-links">
+            <a href="#relogio-section" class="nav-item">Relógio 2026</a>
+            <a href="#agenda-mapa-section" class="nav-item">Agenda &amp; Mapa</a>
+            <a href="#dicionario-section" class="nav-item">O que Reciclar</a>
+            <a href="#bairros-sustentaveis" class="nav-item">Bairros Sustentáveis</a>
+            <a href="#quiz-section" class="nav-item">Jogo da Reciclagem</a>
+        </div>
+
+        <div class="nav-botoes-acao">
+            <button type="button" class="btn-icon-nav" id="btn-som-toggle" onclick="toggleSom()" title="Efeitos sonoros" aria-label="Alternar som">🔊</button>
+            <button type="button" class="btn-icon-nav" id="btn-tema-toggle" onclick="toggleTema()" title="Alternar tema" aria-label="Alternar modo escuro">☀️</button>
+        </div>
+    </nav>
+
+    <!-- HEADER INICIAL ORIGINAL -->
+    <header class="hero-header">
+        <div class="hero-flutuantes" aria-hidden="true"><span>♻️</span><span>🌱</span><span>🍃</span><span>♻️</span><span>🌍</span><span>🌿</span></div>
+        <div class="header-content">
+            <h1>A Revolução Sustentável de São José dos Pinhais</h1>
+            <p>Conectando cidadãos, otimizando a coleta e reduzindo o impacto ambiental através da tecnologia e economia circular.</p>
+        </div>
+    </header>
+
+    <main id="principal" tabindex="-1">
+
+        <!-- DASHBOARD: RELÓGIO DO DESPERDÍCIO -->
+        <section class="dashboard-glass fade-in" id="relogio-section">
+            <div class="relogio-header-flex">
+                <div>
+                    <h2>⏰ Relógio do Desperdício em SJP (2026)</h2>
+                    <p class="subtitulo-dash">Resíduos enviados ao aterro sanitário desde 1º de Janeiro.</p>
+                </div>
+                <div class="seletor-periodo-relogio" role="group" aria-label="Período do relógio">
+                    <button type="button" class="btn-periodo ativo" onclick="alternarPeriodoRelogio('ano', this)">Ano 2026</button>
+                    <button type="button" class="btn-periodo" onclick="alternarPeriodoRelogio('mes', this)">Este Mês</button>
+                    <button type="button" class="btn-periodo" onclick="alternarPeriodoRelogio('dia', this)">Hoje</button>
+                </div>
+            </div>
+            
+            <div class="contadores-grid">
+                <div class="contador-box total">
+                    <h3>Lixo Total Aterrado</h3>
+                    <div class="numero" id="contador-total">0,00</div>
+                    <span class="unidade">Toneladas</span>
+                    <p class="nota">Coletado e enviado ao aterro</p>
+                </div>
+                
+                <div class="contador-box critico">
+                    <h3>Recicláveis Perdidos</h3>
+                    <div class="numero" id="contador-reciclaveis">0,00</div>
+                    <span class="unidade">Toneladas (32,6%)</span>
+                    <p class="nota">Descartados incorretamente</p>
+                </div>
+
+                <div class="contador-box">
+                    <h3>Caminhões Equivalentes</h3>
+                    <div class="numero" id="contador-caminhoes">0</div>
+                    <span class="unidade">Cargas compactadas</span>
+                    <p class="nota">Capacidade de 12 t / caminhão</p>
+                </div>
+
+                <div class="contador-box">
+                    <h3>Potencial Econômico</h3>
+                    <div class="numero" id="contador-prejuizo">R$ 0</div>
+                    <span class="unidade">Valor de mercado</span>
+                    <p class="nota">Perda acumulada no período</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- KINETIC STORYTELLING -->
+        <section class="ks fade-in" id="kinetic-story" aria-labelledby="ks-titulo">
+            <div class="ks-cabecalho">
+                <h2 id="ks-titulo">Para onde vai o seu lixo?</h2>
+                <p>Uma decisão na lixeira muda o destino do material, o custo para a cidade e o lucro da indústria.</p>
+            </div>
+        
+            <div class="ks-origem">
+                <span class="ks-origem-icone" aria-hidden="true">🗑️</span>
+                <strong>O Seu Descarte</strong>
+            </div>
+        
+            <div class="ks-tronco" aria-hidden="true"></div>
+        
+            <div class="ks-ramos">
+                <!-- Caminho da esquerda: o prejuízo -->
+                <article class="ks-ramo ks-ramo--prejuizo">
+                    <div class="ks-trilha ks-trilha--lenta" aria-hidden="true"></div>
+                    <div class="ks-cartao ks-cartao--alerta">
+                        <span class="ks-selo">Prejuízo</span>
+                        <h3>Misturado (Aterro)</h3>
+                        <p>O lixo misturado <strong>polui o solo</strong> e a água e ainda <strong>custa milhões em impostos</strong> para ser enterrado, enquanto o material reciclável é desperdiçado.</p>
+                    </div>
+                </article>
+            
+                <!-- Caminho da direita: a indústria -->
+                <article class="ks-ramo ks-ramo--industria">
+                    <div class="ks-trilha ks-trilha--rapida" aria-hidden="true"></div>
+                    <div class="ks-cartao ks-cartao--ganho">
+                        <span class="ks-fabrica" aria-hidden="true">🏭</span>
+                        <span class="ks-selo">Oportunidade</span>
+                        <h3>Separado (Indústria)</h3>
+                        <p>As empresas transformam o material em <strong>matéria-prima</strong>, <strong>geram empregos</strong> e podem receber <strong>Subsídios do Governo</strong> e <strong>Isenções Fiscais</strong>.</p>
+                    </div>
+                </article>
+            </div>
+        
+            <p class="ks-nota">Benefícios fiscais dependem de requisitos legais e da situação de cada empresa.</p>
+        </section>
+
+        <!-- SEÇÃO 1: AGENDA DE COLETA & MAPA INTERATIVO -->
+        <section class="container-secao fade-in" id="agenda-mapa-section">
+            <div class="secao-header">
+                <h2>🚚 Coleta Domiciliar &amp; Ecopontos</h2>
+                <p>Consulte os dias de coleta comum e seletiva nos bairros de São José dos Pinhais:</p>
+            </div>
+
+            <!-- Módulo 1: Seleção de Bairros de São José dos Pinhais -->
+            <div class="card-box agenda-box-principal">
+                <div class="agenda-topo-flex">
+                    <div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                            1. Selecione o seu Bairro (São José dos Pinhais)
+                        </h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">
+                            Escolha um bairro na lista ou clique em um dos atalhos rápidos abaixo para ver os horários:
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Seletor Elegante de Bairro -->
+                <div class="seletor-bairro-wrapper">
+                    <label for="seletor-bairro-sjp" class="sr-only">Selecione o seu bairro</label>
+                    <select id="seletor-bairro-sjp" class="select-bairro-elegante" onchange="selecionarBairroSelect(this.value)">
+                        <option value="">👇 Escolha seu bairro em São José dos Pinhais...</option>
+                    </select>
+                </div>
+
+                <!-- Chips de Seleção Rápida dos Bairros Mais Populosos -->
+                <div class="bairros-sugestoes-grid-clean">
+                    <span class="rotulo-sugestoes-regiao">📍 Bairros mais populosos (clique para selecionar):</span>
+                    <div class="chips-bairros-amostra" id="chips-bairros-destaque"></div>
+                </div>
+
+                <!-- Painel de Resultados dos Horários de Coleta -->
+                <div id="resultado-busca-manual" aria-live="polite"></div>
+            </div>
+
+            <!-- Módulo 2: Mapa de Ecopontos e PEVs -->
+            <div class="card-box mapa-box-principal" style="margin-top: 24px;">
+                <div class="mapa-header-bar">
+                    <div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">
+                            2. Mapa de Ecopontos &amp; Cooperativas
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                            Pontos de entrega voluntária (PEVs), postos de óleo de cozinha, pilhas e cooperativas de catadores:
+                        </p>
+                    </div>
+
+                    <button type="button" id="btn-localizar" class="btn-gps" onclick="obterLocalizacaoGPS()">
+                        📍 Encontrar Minha Posição
+                    </button>
+                </div>
+
+                <div id="resultado-gps-bairro" aria-live="polite"></div>
+
+                <!-- Filtros Rápidos do Mapa -->
+                <div class="map-controls-clean" id="map-controls">
+                    <button type="button" class="btn-filtro ativo" onclick="filtrarPontos('todos', this)">🌟 Todos os Pontos</button>
+                    <button type="button" class="btn-filtro" onclick="filtrarPontos('pev', this)">📦 Ecopontos (PEVs)</button>
+                    <button type="button" class="btn-filtro" onclick="filtrarPontos('oleo_pilha', this)">🔋 Óleo &amp; Baterias</button>
+                    <button type="button" class="btn-filtro" onclick="filtrarPontos('cooperativa', this)">🤝 Cooperativas</button>
+                </div>
+
+                <!-- Container do Mapa Leaflet -->
+                <div id="mapa-sjp"></div>
+
+                <!-- Legenda Limpa do Mapa -->
+                <div class="mapa-legenda-clean">
+                    <span><span class="legenda-dot dot-pev"></span> PEVs &amp; Recicláveis</span>
+                    <span><span class="legenda-dot dot-oleo"></span> Óleo &amp; Baterias</span>
+                    <span><span class="legenda-dot dot-coop"></span> Cooperativas Locais</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 2: DICIONÁRIO DE RESÍDUOS & LINHA DO TEMPO DA DECOMPOSIÇÃO -->
+        <section class="container-secao fade-in" id="dicionario-section">
+            <div class="secao-header">
+                <h2>🔍 Guia de Descarte: Posso Reciclar Isso?</h2>
+                <p>Consulte materiais cotidianos e veja o descarte correto para não contaminar lotes recicláveis:</p>
+            </div>
+
+            <div class="card-box" style="margin-bottom: 24px;">
+                <!-- Chips de Filtro por Categoria (Cores das Lixeiras CONAMA) -->
+                <div class="chips-categorias-residuos" id="chips-categorias-residuos">
+                    <button type="button" class="chip-categoria chip-plastico ativo" onclick="filtrarCategoriaResiduo('plastico', this)">🔴 Plásticos (Vermelho)</button>
+                    <button type="button" class="chip-categoria chip-papel" onclick="filtrarCategoriaResiduo('papel', this)">🔵 Papel &amp; Papelão (Azul)</button>
+                    <button type="button" class="chip-categoria chip-vidro" onclick="filtrarCategoriaResiduo('vidro', this)">🟢 Vidros (Verde)</button>
+                    <button type="button" class="chip-categoria chip-metal" onclick="filtrarCategoriaResiduo('metal', this)">🟡 Metais (Amarelo)</button>
+                    <button type="button" class="chip-categoria chip-especial" onclick="filtrarCategoriaResiduo('especial', this)">🟠 Especiais &amp; Eletrônicos (Laranja)</button>
+                    <button type="button" class="chip-categoria chip-organico" onclick="filtrarCategoriaResiduo('organico', this)">🟤 Orgânico &amp; Rejeito (Marrom)</button>
+                </div>
+
+                <div style="position: relative; max-width: 600px; margin: 0 auto;">
+                    <label for="input-consulta-residuo" class="sr-only">Pesquisar resíduo</label>
+                    <input type="text" id="input-consulta-residuo" class="input-simples" placeholder="🔎 Busque um item: caixa de leite, blister, espelho, isopor, cápsula..." autocomplete="off">
+                </div>
+
+                <div id="resultado-consulta-residuo" aria-live="polite"></div>
+            </div>
+
+            <!-- Carrossel Compacto de Decomposição -->
+            <div class="card-box" id="decomposicao-section">
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0;">⏳ Tempo de Decomposição na Natureza</h3>
+                </div>
+
+                <div class="insta-carousel-wrapper">
+                    <button type="button" class="carousel-arrow btn-prev" onclick="moverCarrossel(-1)" aria-label="Voltar slide">‹</button>
+
+                    <div class="insta-carousel-track" id="carrossel-decomposicao">
+                        <!-- Slide 1 -->
+                        <div class="insta-slide">
+                            <div class="insta-card">
+                                <div class="slide-header">
+                                    <span class="slide-contador">1/8</span>
+                                    <span class="categoria-tag tag-verde">Biodegradável</span>
+                                </div>
+                                <div class="slide-corpo">
+                                    <span class="icone-material-insta">🍎</span>
+                                    <h3>Cascas de Frutas e Restos</h3>
+                                    <div class="tempo-destaque">
+                                        <span class="tempo-valor">2 a 12 meses</span>
+                                        <span class="tempo-rotulo">em solo natural</span>
+                                    </div>
+                                    <div class="barra-tempo-container"><div class="barra-tempo nivel-1"></div></div>
+                                </div>
+                                <div class="contraponto-reciclagem">
+                                    <strong>♻️ Solução:</strong> Compostagem doméstica e hortas comunitárias.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 2 -->
+                        <div class="insta-slide">
+                            <div class="insta-card">
+                                <div class="slide-header">
+                                    <span class="slide-contador">2/8</span>
+                                    <span class="categoria-tag tag-azul">Celulose</span>
+                                </div>
+                                <div class="slide-corpo">
+                                    <span class="icone-material-insta">📦</span>
+                                    <h3>Papel e Papelão</h3>
+                                    <div class="tempo-destaque">
+                                        <span class="tempo-valor">3 a 6 meses</span>
+                                        <span class="tempo-rotulo">se exposto à chuva</span>
+                                    </div>
+                                    <div class="barra-tempo-container"><div class="barra-tempo nivel-1"></div></div>
+                                </div>
+                                <div class="contraponto-reciclagem">
+                                    <strong>♻️ Solução:</strong> Retorna como nova embalagem em poucas semanas.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 3 -->
+                        <div class="insta-slide">
+                            <div class="insta-card">
+                                <div class="slide-header">
+                                    <span class="slide-contador">3/8</span>
+                                    <span class="categoria-tag tag-laranja">Resíduo Tóxico</span>
+                                </div>
+                                <div class="slide-corpo">
+                                    <span class="icone-material-insta">🚬</span>
+                                    <h3>Bituca de Cigarro</h3>
+                                    <div class="tempo-destaque">
+                                        <span class="tempo-valor">5 a 10 anos</span>
+                                        <span class="tempo-rotulo">acetato de celulose</span>
+                                    </div>
+                                    <div class="barra-tempo-container"><div class="barra-tempo nivel-2"></div></div>
+                                </div>
+                                <div class="contraponto-reciclagem">
+                                    <strong>⚠️ Impacto:</strong> Contamina até 50 litros de água se descartada na rua.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 4 -->
+                        <div class="insta-slide">
+                            <div class="insta-card">
+                                <div class="slide-header">
+                                    <span class="slide-contador">4/8</span>
+                                    <span class="categoria-tag tag-amarela">Metal Nobre</span>
+                                </div>
+                                <div class="slide-corpo">
+                                    <span class="icone-material-insta">🥫</span>
+                                    <h3>Lata de Alumínio</h3>
+                                    <div class="tempo-destaque">
+                                        <span class="tempo-valor">200 a 500 anos</span>
+                                        <span class="tempo-rotulo">resistente à oxidação</span>
+                                    </div>
+                                    <div class="barra-tempo-container"><div class="barra-tempo nivel-3"></div></div>
+                                </div>
+                                <div class="contraponto-reciclagem">
+                                    <strong>♻️ Eficiência:</strong> Reciclada e volta à prateleira em até 60 dias.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 5 -->
+                        <div class="insta-slide">
+                            <div class="insta-card">
+                                <div class="slide-header">
+                                    <span class="slide-contador">5/8</span>
+                                    <span class="categoria-tag tag-vermelha">Polímero PET</span>
+                                </div>
+                                <div class="slide-corpo">
+                                    <span class="icone-material-insta">🧴</span>
+                                    <h3>Garrafa Plástica (PET)</h3>
+                                    <div class="tempo-destaque">
+                                        <span class="tempo-valor">+450 anos</span>
+                                        <span class="tempo-rotulo">fragmenta em microplásticos</span>
+                                    </div>
+                                    <div class="barra-tempo-container"><div class="barra-tempo nivel-4"></div></div>
+                                </div>
+                                <div class="contraponto-reciclagem">
+                                    <strong>♻️ Upcycling:</strong> Vira fibra têxtil, resina e peças técnicas automotivas.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 6 -->
+                        <div class="insta-slide">
+                            <div class="insta-card">
+                                <div class="slide-header">
+                                    <span class="slide-contador">6/8</span>
+                                    <span class="categoria-tag tag-vermelha">Polímero EPS</span>
+                                </div>
+                                <div class="slide-corpo">
+                                    <span class="icone-material-insta">🥡</span>
+                                    <h3>Bandeja de Isopor (EPS)</h3>
+                                    <div class="tempo-destaque">
+                                        <span class="tempo-valor">Indeterminado</span>
+                                        <span class="tempo-rotulo">não degrada facilmente</span>
+                                    </div>
+                                    <div class="barra-tempo-container"><div class="barra-tempo nivel-4"></div></div>
+                                </div>
+                                <div class="contraponto-reciclagem">
+                                    <strong>♻️ Reciclabilidade:</strong> 100% reciclável se entregue limpo e seco.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 7 -->
+                        <div class="insta-slide">
+                            <div class="insta-card">
+                                <div class="slide-header">
+                                    <span class="slide-contador">7/8</span>
+                                    <span class="categoria-tag tag-laranja">Resíduo Sintético</span>
+                                </div>
+                                <div class="slide-corpo">
+                                    <span class="icone-material-insta">🧽</span>
+                                    <h3>Esponja de Cozinha</h3>
+                                    <div class="tempo-destaque">
+                                        <span class="tempo-valor">+100 anos</span>
+                                        <span class="tempo-rotulo">poliuretano espumado</span>
+                                    </div>
+                                    <div class="barra-tempo-container"><div class="barra-tempo nivel-3"></div></div>
+                                </div>
+                                <div class="contraponto-reciclagem">
+                                    <strong>⚠️ Dica:</strong> Substitua por bucha vegetal compostável.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 8 -->
+                        <div class="insta-slide">
+                            <div class="insta-card">
+                                <div class="slide-header">
+                                    <span class="slide-contador">8/8</span>
+                                    <span class="categoria-tag tag-roxa">Inorgânico Mineral</span>
+                                </div>
+                                <div class="slide-corpo">
+                                    <span class="icone-material-insta">🍾</span>
+                                    <h3>Garrafa ou Pote de Vidro</h3>
+                                    <div class="tempo-destaque">
+                                        <span class="tempo-valor">+4.000 anos</span>
+                                        <span class="tempo-rotulo">praticamente eterno</span>
+                                    </div>
+                                    <div class="barra-tempo-container"><div class="barra-tempo nivel-5"></div></div>
+                                </div>
+                                <div class="contraponto-reciclagem">
+                                    <strong>♻️ Ciclo Infinito:</strong> Fundido infinitas vezes sem nenhuma perda.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="carousel-arrow btn-next" onclick="moverCarrossel(1)" aria-label="Avançar slide">›</button>
+                </div>
+
+                <div class="insta-dots-container" id="carrossel-dots">
+                    <button type="button" class="insta-dot ativo" onclick="irParaSlide(0)" aria-label="Slide 1"></button>
+                    <button type="button" class="insta-dot" onclick="irParaSlide(1)" aria-label="Slide 2"></button>
+                    <button type="button" class="insta-dot" onclick="irParaSlide(2)" aria-label="Slide 3"></button>
+                    <button type="button" class="insta-dot" onclick="irParaSlide(3)" aria-label="Slide 4"></button>
+                    <button type="button" class="insta-dot" onclick="irParaSlide(4)" aria-label="Slide 5"></button>
+                    <button type="button" class="insta-dot" onclick="irParaSlide(5)" aria-label="Slide 6"></button>
+                    <button type="button" class="insta-dot" onclick="irParaSlide(6)" aria-label="Slide 7"></button>
+                    <button type="button" class="insta-dot" onclick="irParaSlide(7)" aria-label="Slide 8"></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 3: BAIRROS SUSTENTÁVEIS (SOBRAS INDUSTRIAIS & PROJETOS SOCIAIS) -->
+        <section class="container-secao fade-in" id="bairros-sustentaveis">
+            <div class="secao-header">
+                <h2>🌱 Bairros Sustentáveis: Economia Circular em SJP</h2>
+                <p>Conheça as iniciativas locais onde sobras industriais geram capacitação profissional gratuita e novos produtos:</p>
+            </div>
+
+            <div class="bairros-carousel-wrapper">
+                <button type="button" class="carousel-arrow btn-prev" onclick="moverCarrosselProjetos(-1)" aria-label="Card anterior">‹</button>
+                <div class="projetos-carousel-track" id="carrossel-projetos-track">
+                    <!-- Projeto 1: Associação Borda Viva / Renault -->
+                    <div class="projeto-slide">
+                        <div class="projeto-card">
+                            <div class="projeto-imagem-container">
+                                <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/0bd6f0_0d4a068b4b7346e69bba2c9af9207d85~mv2.jpg" 
+                                     alt="Associação Borda Viva - Upcycling Renault" class="projeto-img"
+                                     referrerpolicy="no-referrer"
+                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&auto=format&fit=crop&q=80';">
+                                <span class="badge-bairro">📍 Borda do Campo</span>
+                            </div>
+                            <div class="projeto-conteudo">
+                                <div class="projeto-empresa-header">
+                                    <span>Parceria: Renault do Brasil</span>
+                                    <span class="tag-tipo">Upcycling Têxtil</span>
+                                </div>
+                                <h3>Associação Borda Viva</h3>
+                                <p class="projeto-descricao">
+                                    Transforma sobras de tecidos de bancos automotivos e cintos de segurança da Renault em bolsas, mochilas executivas e ecobags de alta resistência.
+                                </p>
+
+                                <div class="projeto-cursos-box">
+                                    <strong>Cursos Gratuitos:</strong>
+                                    <ul>
+                                        <li>• Corte &amp; Costura Industrial e Modelagem</li>
+                                        <li>• Panificação Comunitária &amp; Culinária</li>
+                                        <li>• Empreendedorismo Feminino</li>
+                                    </ul>
+                                </div>
+
+                                <div class="projeto-link-container">
+                                    <a href="https://www.associacaobordaviva.com" target="_blank" rel="noopener noreferrer" class="link-projeto-site">
+                                        🌐 Conhecer no Site Oficial ↗
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projeto 2: Geração Futuro Jovens Talentos / Instituto Renault -->
+                    <div class="projeto-slide">
+                        <div class="projeto-card">
+                            <div class="projeto-imagem-container">
+                                <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/0bd6f0_d834f557864f4be5af39e1dd7c0a14db~mv2.jpg" 
+                                     alt="Geração Futuro Jovens Talentos - Instituto Renault" class="projeto-img"
+                                     referrerpolicy="no-referrer"
+                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80';">
+                                <span class="badge-bairro">📍 Borda do Campo</span>
+                            </div>
+                            <div class="projeto-conteudo">
+                                <div class="projeto-empresa-header">
+                                    <span>Instituto Renault</span>
+                                    <span class="tag-tipo">Jovens Talentos</span>
+                                </div>
+                                <h3>Geração Futuro Jovens Talentos</h3>
+                                <p class="projeto-descricao">
+                                    O programa educacional Geração Futuro Jovens Talentos forma jovens da comunidade da Borda do Campo, em São José dos Pinhais, ampliando suas perspectivas de acesso ao mercado de trabalho.
+                                </p>
+
+                                <div class="projeto-cursos-box">
+                                    <strong>Qualificação para o Mercado (14 a 24 anos):</strong>
+                                    <ul>
+                                        <li>• Português, Comunicação &amp; Expressão</li>
+                                        <li>• Informática (Pacote Office): Word, Excel e PPT</li>
+                                        <li>• Gestão Administrativa, Financeira e Compras</li>
+                                        <li>• Logística, Cadeia Verde e Logística Reversa</li>
+                                        <li>• Compliance, Ética, Cidadania e Empregabilidade</li>
+                                    </ul>
+                                </div>
+
+                                <div class="projeto-link-container">
+                                    <a href="https://institutorenault.com.br/inclusao/geracao-futuro" target="_blank" rel="noopener noreferrer" class="link-projeto-site">
+                                        🌐 Conhecer no Site Oficial ↗
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projeto 3: Cores Fora de Tela -->
+                    <div class="projeto-slide">
+                        <div class="projeto-card">
+                            <div class="projeto-imagem-container">
+                                <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&auto=format&fit=crop&q=80" 
+                                     alt="Projeto Cores Fora de Tela - Escola Terezinha Toczek SJP" class="projeto-img"
+                                     referrerpolicy="no-referrer"
+                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1588072432836-e10032774350?w=600&auto=format&fit=crop&q=80';">
+                                <span class="badge-bairro">📍 Vila Nova</span>
+                            </div>
+                            <div class="projeto-conteudo">
+                                <div class="projeto-empresa-header">
+                                    <span>Alpha Química, Schattdecor &amp; Alvorada</span>
+                                    <span class="tag-tipo">Cores Fora de Tela</span>
+                                </div>
+                                <h3>Projeto Cores Fora de Tela</h3>
+                                <p class="projeto-descricao">
+                                    Alpha Química, Schattdecor e Alvorada Autopeças patrocinam em conjunto este projeto desenvolvido na Escola Municipal Profª Terezinha Toczek, atendendo crianças de 7 a 10 anos no contraturno escolar com foco no uso consciente da tecnologia.
+                                </p>
+
+                                <div class="projeto-cursos-box">
+                                    <strong>Oficinas de Ilustração &amp; Arte (7 a 10 anos):</strong>
+                                    <ul>
+                                        <li>• Redução do Uso Excessivo de Telas</li>
+                                        <li>• Oficinas Práticas de Ilustração e Desenho</li>
+                                        <li>• Kits Completos com Mochilas e Materiais de Arte</li>
+                                    </ul>
+                                </div>
+
+                                <div class="projeto-link-container">
+                                    <a href="https://amigosdohc.org.br" target="_blank" rel="noopener noreferrer" class="link-projeto-site">
+                                        🌐 Conhecer no Site Oficial ↗
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projeto 4: GEMÜ do Brasil -->
+                    <div class="projeto-slide">
+                        <div class="projeto-card">
+                            <div class="projeto-imagem-container">
+                                <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&auto=format&fit=crop&q=80" 
+                                     alt="GEMÜ do Brasil - Desenvolvimento Comunitário em SJP" class="projeto-img"
+                                     referrerpolicy="no-referrer"
+                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&auto=format&fit=crop&q=80';">
+                                <span class="badge-bairro">📍 Afonso Pena / Parque da Fonte</span>
+                            </div>
+                            <div class="projeto-conteudo">
+                                <div class="projeto-empresa-header">
+                                    <span>GEMÜ do Brasil</span>
+                                    <span class="tag-tipo">Apoio aos CMEIs</span>
+                                </div>
+                                <h3>GEMÜ do Brasil: Apoio à Infância</h3>
+                                <p class="projeto-descricao">
+                                    A multinacional alemã do setor de metalurgia adota frentes de desenvolvimento comunitário focadas diretamente na infância, atuando em melhorias estruturais e manutenção de CMEIs de São José dos Pinhais.
+                                </p>
+
+                                <div class="projeto-cursos-box">
+                                    <strong>Ações Sociais nos CMEIs de SJP:</strong>
+                                    <ul>
+                                        <li>• Melhorias Estruturais &amp; Manutenção de CMEIs</li>
+                                        <li>• Doação de Alimentos e Produtos de Higiene</li>
+                                        <li>• Distribuição de Roupas &amp; Equipamentos Didáticos</li>
+                                    </ul>
+                                </div>
+
+                                <div class="projeto-link-container">
+                                    <a href="https://www.gemu-group.com/pt-br/" target="_blank" rel="noopener noreferrer" class="link-projeto-site">
+                                        🌐 Conhecer no Site Oficial GEMÜ ↗
+                                    </a>
+                                    <a href="https://itaqueraemnoticias.com.br/noticia/159797/impacto-social-da-industria-na-comunidade-fortalece-lacos-com-escolas-e-familias-de-sao-jose-dos-pinhais" target="_blank" rel="noopener noreferrer" class="link-projeto-secundario">
+                                        📰 Ler Notícia do Impacto Social ↗
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projeto 5: Horse Powertrain -->
+                    <div class="projeto-slide">
+                        <div class="projeto-card">
+                            <div class="projeto-imagem-container">
+                                <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80" 
+                                     alt="Horse Powertrain - Mentoria e Novos Empreendedores em SJP" class="projeto-img"
+                                     referrerpolicy="no-referrer"
+                                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&auto=format&fit=crop&q=80';">
+                                <span class="badge-bairro">📍 Roseira de São Sebastião</span>
+                            </div>
+                            <div class="projeto-conteudo">
+                                <div class="projeto-empresa-header">
+                                    <span>Horse Powertrain</span>
+                                    <span class="tag-tipo">Empreendedorismo</span>
+                                </div>
+                                <h3>Horse Powertrain: Novos Empreendedores</h3>
+                                <p class="projeto-descricao">
+                                    Separada recentemente da Renault, a fabricante de motores mantém investimentos anuais na região de R$ 150 mil em projetos sociais próprios. No bairro Roseira de São Sebastião, o destaque é o programa de capacitação para novos empreendedores locais, com oficinas de educação ambiental e mentoria de carreira oferecidas voluntariamente pelos próprios engenheiros e funcionários da fábrica.
+                                </p>
+
+                                <div class="projeto-cursos-box">
+                                    <strong>Capacitação &amp; Mentoria Voluntária:</strong>
+                                    <ul>
+                                        <li>• Formação de Novos Empreendedores Locais</li>
+                                        <li>• Oficinas de Educação Ambiental &amp; Sustentabilidade</li>
+                                        <li>• Mentoria de Carreira com Engenheiros da Fábrica</li>
+                                    </ul>
+                                </div>
+
+                                <div class="projeto-link-container">
+                                    <a href="https://economiapr.com.br/2025/11/12/projeto-forma-15-novos-empreendedores-em-sao-jose-dos-pinhais/" target="_blank" rel="noopener noreferrer" class="link-projeto-site">
+                                        🌐 Conhecer no Site Oficial ↗
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="carousel-arrow btn-next" onclick="moverCarrosselProjetos(1)" aria-label="Próximo card">›</button>
+            </div>
+
+            <div class="insta-dots-container" id="dots-carrossel-projetos">
+                <button type="button" class="insta-dot ativo" onclick="irParaSlideProjeto(0)" aria-label="Ver Projeto 1"></button>
+                <button type="button" class="insta-dot" onclick="irParaSlideProjeto(1)" aria-label="Ver Projeto 2"></button>
+                <button type="button" class="insta-dot" onclick="irParaSlideProjeto(2)" aria-label="Ver Projeto 3"></button>
+                <button type="button" class="insta-dot" onclick="irParaSlideProjeto(3)" aria-label="Ver Projeto 4"></button>
+                <button type="button" class="insta-dot" onclick="irParaSlideProjeto(4)" aria-label="Ver Projeto 5"></button>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 4: QUIZ ECOLÓGICO & JOGO DA RECICLAGEM -->
+        <section class="container-secao fade-in" id="quiz-section">
+            <div class="secao-header">
+                <h2>🎮 Desafio da Reciclagem: Jogo Interativo</h2>
+                <p>Teste seus conhecimentos e aprenda de forma rápida e didática como separar seus resíduos em São José dos Pinhais:</p>
+            </div>
+
+            <div class="quiz-container-moderno">
+                <!-- Barra de Status & Placar -->
+                <div class="quiz-placar-header">
+                    <div class="quiz-status-item">
+                        <span class="quiz-status-label">Desafio</span>
+                        <strong id="quiz-contador-etapa" class="quiz-status-valor">1 de 6</strong>
+                    </div>
+                    <div class="quiz-status-item">
+                        <span class="quiz-status-label">Acertos</span>
+                        <strong id="quiz-pontos-valor" class="quiz-status-valor">⭐ 0</strong>
+                    </div>
+                </div>
+
+                <!-- Barra de Progresso -->
+                <div class="quiz-progresso-container" aria-label="Progresso do quiz">
+                    <div id="quiz-barra-progresso" class="quiz-progresso-barra"></div>
+                </div>
+
+                <div id="quiz-content" class="quiz-content-box">
+                    <!-- Cartão da Pergunta / Item -->
+                    <div id="pergunta-quiz" class="pergunta-quiz-card"></div>
+
+                    <!-- Lixeiras Interativas -->
+                    <div id="botoes-quiz" class="grid-lixeiras-moderno"></div>
+
+                    <!-- Feedback Didático -->
+                    <div id="feedback-quiz" class="feedback-caixa-didatica" aria-live="polite"></div>
+
+                    <!-- Botões de Ação do Quiz -->
+                    <div class="quiz-acoes-container">
+                        <button type="button" id="btn-pular-timer" class="btn-quiz-acao btn-quiz-avancar" onclick="avancarImediatamente()" style="display: none;">
+                            Próximo Desafio ➔
+                        </button>
+                        <button type="button" id="btn-proxima" class="btn-quiz-acao btn-quiz-reiniciar" onclick="proximaPergunta()" style="display: none;">
+                            Próximo Desafio ➔
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODAL DE DETALHES DO PROJETO COM LINKS OFICIAIS -->
+        <div id="modal-projeto" class="modal-backdrop" onclick="fecharModalProjeto(event)">
+            <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+                <button type="button" class="modal-btn-fechar" onclick="fecharModalProjetoForcado()" aria-label="Fechar janela">×</button>
+                <div id="modal-conteudo-dinamico"></div>
+            </div>
+        </div>
+
+        <!-- MODAL DE CERTIFICADO DE SUSTENTABILIDADE & MÉRITO -->
+        <div id="modal-certificado" class="modal-backdrop" onclick="fecharModalCertificado(event)">
+            <div class="modal-dialog modal-certificado-dialog" role="dialog" aria-modal="true" aria-labelledby="certificado-titulo">
+                <button type="button" class="modal-btn-fechar" onclick="fecharModalCertificadoForcado()" aria-label="Fechar certificado">×</button>
+                
+                <div class="certificado-form-box" style="margin-bottom: 16px;">
+                    <h3 id="certificado-titulo" style="font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;">Certificado de Mérito Ambiental</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">Personalize o nome para salvar em PDF ou imprimir:</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <label for="input-nome-certificado" class="sr-only">Seu Nome ou Razão Social</label>
+                        <input type="text" id="input-nome-certificado" class="input-simples" style="flex: 1; min-width: 220px;" placeholder="Digite seu Nome ou Empresa..." value="Cidadão Consciente de SJP" oninput="atualizarNomeCertificado()">
+                        <button type="button" class="btn-primario-clean" onclick="imprimirCertificado()">🖨️ Imprimir / Salvar PDF</button>
+                    </div>
+                </div>
+
+                <!-- Folha do Certificado -->
+                <div id="folha-certificado" class="folha-certificado">
+                    <div class="folha-borda-dupla">
+                        <div class="folha-cabecalho">
+                            <span class="folha-selo">♻️ RECICLA SJP</span>
+                            <div class="folha-orgaos">
+                                <div>Programa de Educação Ambiental &amp; Economia Circular</div>
+                                <div>São José dos Pinhais - Paraná</div>
+                            </div>
+                        </div>
+                        
+                        <h2 class="folha-titulo">CERTIFICADO DE MÉRITO AMBIENTAL</h2>
+                        <p class="folha-subtitulo">Reconhecimento por Boas Práticas de Economia Circular e Gestão de Resíduos</p>
+                        
+                        <p style="font-size: 0.95rem; margin-bottom: 6px;">Certificamos com distinção que</p>
+                        <h1 class="folha-nome" id="certificado-nome-display">Cidadão Consciente de SJP</h1>
+                        
+                        <p class="folha-declaracao">
+                            concluiu com 100% de aproveitamento o Desafio da Reciclagem do portal <strong>Recicla SJP</strong>, demonstrando domínio das diretrizes de segregação correta de resíduos sólidos, desvio de materiais de aterros sanitários e apoio à valorização social dos catadores e cooperativas locais de São José dos Pinhais, em conformidade com as Metas dos <strong>ODS 11 &amp; 12 da ONU</strong> e a Política Nacional de Resíduos Sólidos (Lei 12.305/10).
+                        </p>
+
+                        <div class="folha-metricas-preview">
+                            <div class="folha-metrica-item">
+                                <strong id="cert-reciclado">195 kg/ano</strong>
+                                <small>Resíduos Salvos</small>
+                            </div>
+                            <div class="folha-metrica-item">
+                                <strong id="cert-arvores">1.4 Árvores</strong>
+                                <small>Preservadas</small>
+                            </div>
+                            <div class="folha-metrica-item">
+                                <strong id="cert-co2">293 kg</strong>
+                                <small>CO₂ Evitado</small>
+                            </div>
+                        </div>
+
+                        <div class="folha-rodape">
+                            <div class="folha-assinatura">
+                                <div class="folha-linha-assinatura"></div>
+                                <strong>Portal Recicla SJP</strong>
+                                <small>Educação Ambiental e Sustentabilidade</small>
+                                <small>São José dos Pinhais - PR</small>
+                            </div>
+                            <div class="folha-data-auth">
+                                <span id="certificado-data-emissao">São José dos Pinhais, 2026</span>
+                                <span style="font-family: monospace; font-size: 0.7rem; color: #94a3b8; display: block; margin-top: 4px;">Código: RECICLA-SJP-2026</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão Voltar ao Topo Discreto -->
+        <button type="button" id="btn-topo" class="btn-voltar-topo" onclick="voltarAoTopo()" title="Voltar ao início" aria-label="Voltar ao topo">↑</button>
+
+    </main>
+
+    <!-- Rodapé Limpo & Acadêmico -->
+    <footer>
+        <p><strong>PIEX III</strong> - Gestão de Produção Industrial | UniDomBosco - 2026</p>
+        <p>Projeto: <strong>Recicla SJP</strong> | Autor: <strong>Diego Francisco dos Santos</strong> | RA: 25204862</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+            Alinhado aos Objetivos de Desenvolvimento Sustentável da ONU: ODS 11 (Cidades Sustentáveis) e ODS 12 (Consumo e Produção Responsáveis).
+        </p>
+    </footer>
+
+    <!-- Script Principal -->
+    <script defer src="js/script.js"></script>
+</body>
+</html>
