@@ -161,7 +161,7 @@ O projeto não exige instalação de dependências (`npm`, `node_modules` ou ban
 
 1. **Clone ou baixe este repositório:**
    ```bash
-   git clone https://github.com/SEU-USUARIO/recicla-sjp.git
+   git clone https://github.com/diegosantosdev/recicla-sjp.git
    ```
 2. **Abra o arquivo `index.html`:**
    * Basta dar dois cliques no arquivo `index.html` para abri-lo em qualquer navegador moderno (Chrome, Safari, Firefox, Edge).
@@ -173,16 +173,10 @@ O projeto não exige instalação de dependências (`npm`, `node_modules` ou ban
 
 ---
 
-## 🚀 Como Publicar no GitHub Pages
+## 🚀 Acesso Online (GitHub Pages)
 
-1. Suba os arquivos deste projeto para um repositório **Público** no seu GitHub (pelo **GitHub Desktop** ou navegador).
-2. No repositório do GitHub, acesse a aba **Settings** (Configurações ⚙️).
-3. No menu lateral esquerdo, clique em **Pages**.
-4. Em **Build and deployment** $\rightarrow$ **Branch**, selecione a branch **`main`** e a pasta **`/ (root)`**, e clique em **Save**.
-5. Aguarde cerca de 1 a 2 minutos e acesse a URL gerada:
-   ```text
-   https://SEU-USUARIO.github.io/recicla-sjp/
-   ```
+O portal está publicado e acessível gratuitamente pelo GitHub Pages:
+* 🌐 **Site ao vivo:** [https://diegosantosdev.github.io/recicla-sjp/](https://diegosantosdev.github.io/recicla-sjp/)
 
 ---
 
@@ -195,11 +189,10 @@ Contribuições da comunidade, de escolas, cooperativas e moradores de São Jos�
 
 ---
 
-## 🎓 Créditos e Contexto Acadêmico
+## 👨‍💻 Autoria e Créditos
 
-* **Projeto de Extensão:** PIEX III — Gestão de Produção Industrial
-* **Instituição:** Centro Universitário UniDomBosco (2026)
-* **Autor / Pesquisador Responsável:** Diego Francisco dos Santos (RA: 25204862)
+* **Projeto:** Portal Recicla SJP — Educação Ambiental e Economia Circular
+* **Desenvolvedor:** Diego Francisco dos Santos ([@diegosantosdev](https://github.com/diegosantosdev))
 * **Localidade Foco:** São José dos Pinhais — Paraná, Brasil
 
 ---
