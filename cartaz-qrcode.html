@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cartaz & QR Code de Divulgação | Recicla SJP</title>
+    <title>Central de Cartazes & Panfletos com QR Code | Recicla SJP</title>
     <style>
         :root {
             --emerald-900: #064e3b;
@@ -22,11 +22,13 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #f1f5f9;
+            background: #e2e8f0;
             color: var(--slate-900);
             padding: 24px 16px 60px;
             display: flex;
@@ -34,7 +36,9 @@
             align-items: center;
         }
 
-        /* Barra de controle (Não sai na impressão) */
+        /* =========================================
+           PAINEL DE CONTROLE (NÃO SAI NA IMPRESSÃO)
+           ========================================= */
         .painel-controle {
             max-width: 210mm;
             width: 100%;
@@ -43,12 +47,18 @@
             border-radius: 16px;
             padding: 18px 22px;
             margin-bottom: 24px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .painel-topo {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            gap: 14px;
+            gap: 12px;
         }
 
         .painel-info h1 {
@@ -66,6 +76,56 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+        }
+
+        .seletor-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-layout {
+            border: 2px solid transparent;
+            background: #ffffff;
+            color: var(--slate-700);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-align: center;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04);
+        }
+
+        .btn-layout small {
+            font-weight: 500;
+            font-size: 0.76rem;
+            color: var(--slate-500);
+        }
+
+        .btn-layout:hover {
+            border-color: #a7f3d0;
+            background: var(--emerald-50);
+        }
+
+        .btn-layout.ativo {
+            background: var(--emerald-700);
+            color: #ffffff;
+            border-color: var(--emerald-900);
+            box-shadow: 0 4px 12px rgba(4, 120, 87, 0.25);
+        }
+
+        .btn-layout.ativo small {
+            color: #d1fae5;
         }
 
         .btn {
@@ -98,29 +158,39 @@
             border: 1px solid #a7f3d0;
         }
 
-        /* Folha A4 do Cartaz */
+        /* =========================================
+           FOLHA A4 BASE
+           ========================================= */
         .folha-a4 {
             width: 210mm;
-            min-height: 297mm;
+            height: 297mm;
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
-            padding: 16mm 18mm;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
             position: relative;
             overflow: hidden;
-            border: 1px solid #e2e8f0;
+            display: none;
+        }
+
+        .folha-a4.ativo {
+            display: flex;
+        }
+
+        /* =========================================
+           MODO 1: 1 CARTAZ INTEIRO POR FOLHA (A4)
+           ========================================= */
+        .folha-1up {
+            padding: 14mm 16mm;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .faixa-topo {
             background: linear-gradient(135deg, var(--emerald-900), var(--emerald-700));
             color: #ffffff;
-            padding: 22px 26px;
-            border-radius: 20px;
+            padding: 20px 24px;
+            border-radius: 18px;
             text-align: center;
-            box-shadow: 0 8px 20px rgba(6, 78, 59, 0.18);
         }
 
         .badge-cidade {
@@ -128,102 +198,98 @@
             background: rgba(255, 255, 255, 0.18);
             border: 1px solid rgba(255, 255, 255, 0.35);
             color: #ecfdf5;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            padding: 5px 14px;
+            padding: 4px 14px;
             border-radius: 999px;
-            margin-bottom: 10px;
-        }
-
-        .faixa-topo h2 {
-            font-size: 2.05rem;
-            line-height: 1.15;
-            font-weight: 800;
             margin-bottom: 8px;
         }
 
+        .faixa-topo h2 {
+            font-size: 1.95rem;
+            line-height: 1.15;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
         .faixa-topo p {
-            font-size: 1.05rem;
+            font-size: 1rem;
             opacity: 0.95;
             max-width: 560px;
             margin: 0 auto;
         }
 
-        /* Chamada principal */
         .chamada-central {
             text-align: center;
-            margin: 18px 0 12px;
+            margin: 10px 0 6px;
         }
 
         .chamada-central h3 {
-            font-size: 1.55rem;
+            font-size: 1.45rem;
             color: var(--emerald-900);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .chamada-central p {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--slate-700);
         }
 
-        /* Grid de benefícios */
         .beneficios-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 12px 0;
+            gap: 10px;
+            margin: 8px 0;
         }
 
         .beneficio-card {
             background: var(--emerald-50);
             border: 1.5px solid #a7f3d0;
             border-radius: 14px;
-            padding: 13px 16px;
+            padding: 12px 14px;
             display: flex;
             align-items: flex-start;
-            gap: 12px;
+            gap: 10px;
         }
 
         .beneficio-icone {
-            font-size: 1.65rem;
+            font-size: 1.55rem;
             line-height: 1;
             flex-shrink: 0;
         }
 
         .beneficio-texto strong {
             display: block;
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             color: var(--emerald-900);
             margin-bottom: 2px;
         }
 
         .beneficio-texto span {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--slate-700);
-            line-height: 1.35;
+            line-height: 1.32;
             display: block;
         }
 
-        /* Área de Destaque do QR Code */
         .qr-box-destaque {
             background: #ffffff;
             border: 3px dashed var(--emerald-600);
-            border-radius: 24px;
-            padding: 20px 24px;
-            margin: 14px auto;
+            border-radius: 22px;
+            padding: 16px 22px;
+            margin: 8px auto;
             width: 100%;
-            max-width: 520px;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            box-shadow: 0 12px 30px rgba(5, 150, 105, 0.08);
         }
 
         .qr-instrucao-topo {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.06em;
@@ -231,47 +297,45 @@
             background: var(--emerald-100);
             padding: 5px 14px;
             border-radius: 999px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .qr-moldura {
             background: #ffffff;
-            padding: 12px;
-            border-radius: 18px;
+            padding: 10px;
+            border-radius: 16px;
             border: 2px solid var(--emerald-800);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .qr-moldura img {
-            width: 220px;
-            height: 220px;
+            width: 205px;
+            height: 205px;
             display: block;
         }
 
         .qr-url-box {
             background: #f8fafc;
             border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 8px 16px;
+            border-radius: 8px;
+            padding: 6px 14px;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 700;
             color: var(--emerald-900);
-            margin-top: 4px;
-            word-break: break-all;
+            margin-top: 3px;
         }
 
-        /* Rodapé do Cartaz */
         .rodape-cartaz {
             border-top: 2px solid #e2e8f0;
-            padding-top: 12px;
+            padding-top: 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             color: var(--slate-500);
         }
 
@@ -286,7 +350,315 @@
             padding: 4px 12px;
             border-radius: 999px;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
+        }
+
+        /* =========================================
+           MODO 2: 2 CARTAZES POR FOLHA (MEIA PÁGINA A5)
+           ========================================= */
+        .folha-2up {
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .metade-a5 {
+            height: 148.5mm;
+            width: 100%;
+            padding: 10mm 14mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .metade-a5:first-child {
+            border-bottom: 2px dashed #94a3b8;
+        }
+
+        .etiqueta-corte-horizontal {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            padding: 0 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            z-index: 5;
+        }
+
+        .a5-header {
+            background: linear-gradient(135deg, var(--emerald-900), var(--emerald-700));
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .a5-header-texto h2 {
+            font-size: 1.32rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 3px;
+        }
+
+        .a5-header-texto p {
+            font-size: 0.82rem;
+            opacity: 0.92;
+        }
+
+        .a5-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .a5-corpo {
+            display: grid;
+            grid-template-columns: 1.25fr 0.95fr;
+            gap: 14px;
+            align-items: center;
+            margin: 8px 0;
+        }
+
+        .a5-lista-beneficios {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .a5-item {
+            background: var(--emerald-50);
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .a5-item-icone {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        .a5-item strong {
+            display: block;
+            font-size: 0.86rem;
+            color: var(--emerald-900);
+        }
+
+        .a5-item span {
+            font-size: 0.76rem;
+            color: var(--slate-700);
+            line-height: 1.25;
+            display: block;
+        }
+
+        .a5-qr-card {
+            border: 2.5px dashed var(--emerald-600);
+            border-radius: 16px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: #ffffff;
+        }
+
+        .a5-qr-tag {
+            background: var(--emerald-100);
+            color: var(--emerald-800);
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 999px;
+            margin-bottom: 6px;
+        }
+
+        .a5-qr-card img {
+            width: 138px;
+            height: 138px;
+            border: 2px solid var(--emerald-800);
+            border-radius: 12px;
+            padding: 6px;
+            background: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .a5-qr-url {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--emerald-900);
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 4px 8px;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        .a5-rodape {
+            border-top: 1.5px solid #e2e8f0;
+            padding-top: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.74rem;
+            color: var(--slate-500);
+        }
+
+        /* =========================================
+           MODO 3: 4 PANFLETOS POR FOLHA (GRADE 2x2 A6)
+           ========================================= */
+        .folha-4up {
+            display: none;
+            grid-template-columns: repeat(2, 105mm);
+            grid-template-rows: repeat(2, 148.5mm);
+            width: 210mm;
+            height: 297mm;
+        }
+
+        .folha-4up.ativo {
+            display: grid;
+        }
+
+        .quarto-a6 {
+            width: 105mm;
+            height: 148.5mm;
+            padding: 7mm 7.5mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Linhas tracejadas de corte em cruz (2x2) */
+        .quarto-a6:nth-child(1) {
+            border-right: 1.8px dashed #94a3b8;
+            border-bottom: 1.8px dashed #94a3b8;
+        }
+        .quarto-a6:nth-child(2) {
+            border-bottom: 1.8px dashed #94a3b8;
+        }
+        .quarto-a6:nth-child(3) {
+            border-right: 1.8px dashed #94a3b8;
+        }
+
+        .a6-topo {
+            background: linear-gradient(135deg, var(--emerald-900), var(--emerald-700));
+            color: #ffffff;
+            padding: 9px 11px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .a6-badge {
+            display: inline-block;
+            font-size: 0.64rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-bottom: 4px;
+        }
+
+        .a6-topo h2 {
+            font-size: 0.98rem;
+            line-height: 1.18;
+            font-weight: 800;
+        }
+
+        .a6-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin: 5px 0;
+        }
+
+        .a6-feat {
+            background: var(--emerald-50);
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 5px 7px;
+            font-size: 0.68rem;
+            line-height: 1.2;
+            color: var(--slate-700);
+        }
+
+        .a6-feat strong {
+            display: block;
+            color: var(--emerald-900);
+            font-size: 0.72rem;
+            margin-bottom: 1px;
+        }
+
+        .a6-qr-box {
+            border: 2px dashed var(--emerald-600);
+            border-radius: 14px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: #ffffff;
+        }
+
+        .a6-qr-cta {
+            background: var(--emerald-100);
+            color: var(--emerald-800);
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 2px 9px;
+            border-radius: 999px;
+            margin-bottom: 5px;
+        }
+
+        .a6-qr-box img {
+            width: 118px;
+            height: 118px;
+            border: 1.5px solid var(--emerald-800);
+            border-radius: 10px;
+            padding: 4px;
+            background: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .a6-url {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.66rem;
+            font-weight: 700;
+            color: var(--emerald-900);
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 3px 6px;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .a6-rodape {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.64rem;
+            color: var(--slate-500);
         }
 
         @page {
@@ -295,9 +667,12 @@
         }
 
         @media print {
-            body {
+            html, body {
+                width: 210mm;
+                height: 297mm;
                 background: #ffffff;
                 padding: 0;
+                margin: 0;
             }
             .painel-controle {
                 display: none !important;
@@ -308,42 +683,52 @@
                 border-radius: 0;
                 width: 210mm;
                 height: 297mm;
-                padding: 14mm 16mm;
-            }
-        }
-
-        @media (max-width: 760px) {
-            .folha-a4 {
-                width: 100%;
-                min-height: auto;
-                padding: 20px;
-            }
-            .beneficios-grid {
-                grid-template-columns: 1fr;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Painel de controle superior (não aparece na impressão) -->
+    <!-- PAINEL DE CONTROLE (SÓ APARECE NA TELA, SOME NA IMPRESSÃO) -->
     <div class="painel-controle">
-        <div class="painel-info">
-            <h1>🖨️ Cartaz Oficial de Divulgação com QR Code — Recicla SJP</h1>
-            <p>Pronto para imprimir em folha A4 e fixar em condomínios, murais, comércios ou próximo às lixeiras seletivas.</p>
+        <div class="painel-topo">
+            <div class="painel-info">
+                <h1>🖨️ Gerador de Cartazes &amp; Panfletos com QR Code — Recicla SJP</h1>
+                <p>Escolha abaixo quantos cartazes deseja imprimir na mesma folha A4:</p>
+            </div>
+            <div class="painel-botoes">
+                <a class="btn btn-qr" href="qrcode-recicla-sjp.png" download="qrcode-recicla-sjp.png">
+                    ⬇️ Baixar Só o QR Code (PNG)
+                </a>
+                <button type="button" class="btn btn-imprimir" onclick="window.print()">
+                    🖨️ Imprimir / Salvar PDF
+                </button>
+            </div>
         </div>
-        <div class="painel-botoes">
-            <a class="btn btn-qr" href="qrcode-recicla-sjp.png" download="qrcode-recicla-sjp.png">
-                ⬇️ Baixar QR Code Puro (PNG 1000x1000px)
-            </a>
-            <button type="button" class="btn btn-imprimir" onclick="window.print()">
-                🖨️ Imprimir Cartaz A4 / Salvar PDF
+
+        <div class="seletor-layout" role="tablist" aria-label="Escolha o tamanho do cartaz">
+            <button type="button" class="btn-layout ativo" id="btn-modo-1" onclick="selecionarModo(1)">
+                <span>📄 1 por Folha (Inteiro)</span>
+                <small>Cartaz Grande A4 para Mural / Parede</small>
+            </button>
+            <button type="button" class="btn-layout" id="btn-modo-2" onclick="selecionarModo(2)">
+                <span>✂️ 2 por Folha (Meia Página)</span>
+                <small>2 Cartazes Médios para Cortar ao Meio</small>
+            </button>
+            <button type="button" class="btn-layout" id="btn-modo-4" onclick="selecionarModo(4)">
+                <span>✂️ 4 por Folha (Panfletos)</span>
+                <small>4 Mini-Cartazes para Cortar em 4</small>
             </button>
         </div>
     </div>
 
-    <!-- Folha A4 Pronta para Impressão -->
-    <article class="folha-a4" aria-label="Cartaz de divulgação Recicla SJP">
+    <!-- =======================================================
+         OPÇÃO 1: 1 CARTAZ INTEIRO POR PÁGINA A4
+         ======================================================= -->
+    <article id="folha-1" class="folha-a4 folha-1up ativo" aria-label="1 Cartaz A4 Inteiro">
         <header class="faixa-topo">
             <span class="badge-cidade">🌱 São José dos Pinhais • PR</span>
             <h2>♻️ Qual é o dia do Caminhão da Reciclagem aqui no bairro?</h2>
@@ -389,11 +774,11 @@
         <section class="qr-box-destaque">
             <span class="qr-instrucao-topo">📱 Aponte a câmera do seu celular aqui</span>
             <div class="qr-moldura">
-                <img src="qrcode-recicla-sjp.png"
+                <img class="img-qr-oficial" src="qrcode-recicla-sjp.png"
                      onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&ecc=M&margin=8&data=https%3A%2F%2Fdiegosantosdev.github.io%2Frecicla-sjp%2F';"
-                     alt="QR Code para acessar o portal Recicla SJP em https://diegosantosdev.github.io/recicla-sjp/">
+                     alt="QR Code Recicla SJP">
             </div>
-            <p style="font-size: 0.92rem; color: #334155; margin-bottom: 4px;">Ou acesse diretamente pelo link:</p>
+            <p style="font-size: 0.9rem; color: #334155; margin-bottom: 3px;">Ou acesse diretamente pelo link:</p>
             <div class="qr-url-box">diegosantosdev.github.io/recicla-sjp</div>
         </section>
 
@@ -405,5 +790,225 @@
         </footer>
     </article>
 
+    <!-- =======================================================
+         OPÇÃO 2: 2 CARTAZES POR FOLHA (CORTAR AO MEIO)
+         ======================================================= -->
+    <article id="folha-2" class="folha-a4 folha-2up" aria-label="2 Cartazes por Folha A4">
+        <!-- Cartaz Superior (1 de 2) -->
+        <div class="metade-a5">
+            <header class="a5-header">
+                <div class="a5-header-texto">
+                    <h2>♻️ Qual é o dia da Reciclagem aqui no bairro?</h2>
+                    <p>Agenda de coleta seletiva, mapa de Ecopontos e guia de descarte em São José dos Pinhais!</p>
+                </div>
+                <span class="a5-badge">🌱 Recicla SJP</span>
+            </header>
+
+            <div class="a5-corpo">
+                <div class="a5-lista-beneficios">
+                    <div class="a5-item">
+                        <span class="a5-item-icone">🚛</span>
+                        <div>
+                            <strong>Agenda de Coleta (+70 Bairros de SJP)</strong>
+                            <span>Consulte os dias exatos do caminhão de recicláveis e orgânicos na sua rua.</span>
+                        </div>
+                    </div>
+                    <div class="a5-item">
+                        <span class="a5-item-icone">📍</span>
+                        <div>
+                            <strong>Mapa Interativo de Ecopontos e PEVs</strong>
+                            <span>Saiba onde entregar móveis velhos, entulho, óleo de cozinha, vidro e pilhas.</span>
+                        </div>
+                    </div>
+                    <div class="a5-item">
+                        <span class="a5-item-icone">🔍</span>
+                        <div>
+                            <strong>Guia Rápido &amp; Quiz com Certificado</strong>
+                            <span>Tire dúvidas sobre qualquer resíduo e teste seus conhecimentos ambientais!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="a5-qr-card">
+                    <span class="a5-qr-tag">📱 Aponte a Câmera</span>
+                    <img src="qrcode-recicla-sjp.png"
+                         onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=500x500&ecc=M&margin=8&data=https%3A%2F%2Fdiegosantosdev.github.io%2Frecicla-sjp%2F';"
+                         alt="QR Code Recicla SJP">
+                    <div class="a5-qr-url">diegosantosdev.github.io/recicla-sjp</div>
+                </div>
+            </div>
+
+            <footer class="a5-rodape">
+                <span><strong>♻️ Portal Recicla SJP</strong> • Acesso gratuito pelo celular (sem baixar app)</span>
+                <span>🌍 ODS 11 &amp; 12 • ONU</span>
+            </footer>
+
+            <span class="etiqueta-corte-horizontal">✂️ Corte aqui ao meio ✂️</span>
+        </div>
+
+        <!-- Cartaz Inferior (2 de 2) -->
+        <div class="metade-a5">
+            <header class="a5-header">
+                <div class="a5-header-texto">
+                    <h2>♻️ Qual é o dia da Reciclagem aqui no bairro?</h2>
+                    <p>Agenda de coleta seletiva, mapa de Ecopontos e guia de descarte em São José dos Pinhais!</p>
+                </div>
+                <span class="a5-badge">🌱 Recicla SJP</span>
+            </header>
+
+            <div class="a5-corpo">
+                <div class="a5-lista-beneficios">
+                    <div class="a5-item">
+                        <span class="a5-item-icone">🚛</span>
+                        <div>
+                            <strong>Agenda de Coleta (+70 Bairros de SJP)</strong>
+                            <span>Consulte os dias exatos do caminhão de recicláveis e orgânicos na sua rua.</span>
+                        </div>
+                    </div>
+                    <div class="a5-item">
+                        <span class="a5-item-icone">📍</span>
+                        <div>
+                            <strong>Mapa Interativo de Ecopontos e PEVs</strong>
+                            <span>Saiba onde entregar móveis velhos, entulho, óleo de cozinha, vidro e pilhas.</span>
+                        </div>
+                    </div>
+                    <div class="a5-item">
+                        <span class="a5-item-icone">🔍</span>
+                        <div>
+                            <strong>Guia Rápido &amp; Quiz com Certificado</strong>
+                            <span>Tire dúvidas sobre qualquer resíduo e teste seus conhecimentos ambientais!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="a5-qr-card">
+                    <span class="a5-qr-tag">📱 Aponte a Câmera</span>
+                    <img src="qrcode-recicla-sjp.png"
+                         onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=500x500&ecc=M&margin=8&data=https%3A%2F%2Fdiegosantosdev.github.io%2Frecicla-sjp%2F';"
+                         alt="QR Code Recicla SJP">
+                    <div class="a5-qr-url">diegosantosdev.github.io/recicla-sjp</div>
+                </div>
+            </div>
+
+            <footer class="a5-rodape">
+                <span><strong>♻️ Portal Recicla SJP</strong> • Acesso gratuito pelo celular (sem baixar app)</span>
+                <span>🌍 ODS 11 &amp; 12 • ONU</span>
+            </footer>
+        </div>
+    </article>
+
+    <!-- =======================================================
+         OPÇÃO 3: 4 CARTAZES POR FOLHA (CORTAR EM 4 - 2x2)
+         ======================================================= -->
+    <article id="folha-4" class="folha-a4 folha-4up" aria-label="4 Panfletos por Folha A4">
+        <!-- Panfleto 1 -->
+        <div class="quarto-a6">
+            <header class="a6-topo">
+                <span class="a6-badge">🌱 São José dos Pinhais • PR</span>
+                <h2>♻️ Qual é o dia da Coleta Seletiva no seu bairro?</h2>
+            </header>
+            <div class="a6-features">
+                <div class="a6-feat"><strong>🚛 Agenda SJP</strong>Dias do caminhão em +70 bairros.</div>
+                <div class="a6-feat"><strong>📍 Ecopontos</strong>Onde levar móveis, vidro e óleo.</div>
+                <div class="a6-feat"><strong>🔍 O que Reciclar</strong>Tire dúvidas de descarte na hora.</div>
+                <div class="a6-feat"><strong>🏅 Quiz Ambiental</strong>Jogue e ganhe seu Certificado!</div>
+            </div>
+            <div class="a6-qr-box">
+                <span class="a6-qr-cta">📱 Escaneie o QR Code</span>
+                <img src="qrcode-recicla-sjp.png"
+                     onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=400x400&ecc=M&margin=6&data=https%3A%2F%2Fdiegosantosdev.github.io%2Frecicla-sjp%2F';"
+                     alt="QR Code Recicla SJP">
+                <div class="a6-url">diegosantosdev.github.io/recicla-sjp</div>
+            </div>
+            <footer class="a6-rodape">
+                <strong>♻️ Portal Recicla SJP</strong>
+                <span>Grátis • Sem baixar app</span>
+            </footer>
+        </div>
+
+        <!-- Panfleto 2 -->
+        <div class="quarto-a6">
+            <header class="a6-topo">
+                <span class="a6-badge">🌱 São José dos Pinhais • PR</span>
+                <h2>♻️ Qual é o dia da Coleta Seletiva no seu bairro?</h2>
+            </header>
+            <div class="a6-features">
+                <div class="a6-feat"><strong>🚛 Agenda SJP</strong>Dias do caminhão em +70 bairros.</div>
+                <div class="a6-feat"><strong>📍 Ecopontos</strong>Onde levar móveis, vidro e óleo.</div>
+                <div class="a6-feat"><strong>🔍 O que Reciclar</strong>Tire dúvidas de descarte na hora.</div>
+                <div class="a6-feat"><strong>🏅 Quiz Ambiental</strong>Jogue e ganhe seu Certificado!</div>
+            </div>
+            <div class="a6-qr-box">
+                <span class="a6-qr-cta">📱 Escaneie o QR Code</span>
+                <img src="qrcode-recicla-sjp.png"
+                     onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=400x400&ecc=M&margin=6&data=https%3A%2F%2Fdiegosantosdev.github.io%2Frecicla-sjp%2F';"
+                     alt="QR Code Recicla SJP">
+                <div class="a6-url">diegosantosdev.github.io/recicla-sjp</div>
+            </div>
+            <footer class="a6-rodape">
+                <strong>♻️ Portal Recicla SJP</strong>
+                <span>Grátis • Sem baixar app</span>
+            </footer>
+        </div>
+
+        <!-- Panfleto 3 -->
+        <div class="quarto-a6">
+            <header class="a6-topo">
+                <span class="a6-badge">🌱 São José dos Pinhais • PR</span>
+                <h2>♻️ Qual é o dia da Coleta Seletiva no seu bairro?</h2>
+            </header>
+            <div class="a6-features">
+                <div class="a6-feat"><strong>🚛 Agenda SJP</strong>Dias do caminhão em +70 bairros.</div>
+                <div class="a6-feat"><strong>📍 Ecopontos</strong>Onde levar móveis, vidro e óleo.</div>
+                <div class="a6-feat"><strong>🔍 O que Reciclar</strong>Tire dúvidas de descarte na hora.</div>
+                <div class="a6-feat"><strong>🏅 Quiz Ambiental</strong>Jogue e ganhe seu Certificado!</div>
+            </div>
+            <div class="a6-qr-box">
+                <span class="a6-qr-cta">📱 Escaneie o QR Code</span>
+                <img src="qrcode-recicla-sjp.png"
+                     onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=400x400&ecc=M&margin=6&data=https%3A%2F%2Fdiegosantosdev.github.io%2Frecicla-sjp%2F';"
+                     alt="QR Code Recicla SJP">
+                <div class="a6-url">diegosantosdev.github.io/recicla-sjp</div>
+            </div>
+            <footer class="a6-rodape">
+                <strong>♻️ Portal Recicla SJP</strong>
+                <span>Grátis • Sem baixar app</span>
+            </footer>
+        </div>
+
+        <!-- Panfleto 4 -->
+        <div class="quarto-a6">
+            <header class="a6-topo">
+                <span class="a6-badge">🌱 São José dos Pinhais • PR</span>
+                <h2>♻️ Qual é o dia da Coleta Seletiva no seu bairro?</h2>
+            </header>
+            <div class="a6-features">
+                <div class="a6-feat"><strong>🚛 Agenda SJP</strong>Dias do caminhão em +70 bairros.</div>
+                <div class="a6-feat"><strong>📍 Ecopontos</strong>Onde levar móveis, vidro e óleo.</div>
+                <div class="a6-feat"><strong>🔍 O que Reciclar</strong>Tire dúvidas de descarte na hora.</div>
+                <div class="a6-feat"><strong>🏅 Quiz Ambiental</strong>Jogue e ganhe seu Certificado!</div>
+            </div>
+            <div class="a6-qr-box">
+                <span class="a6-qr-cta">📱 Escaneie o QR Code</span>
+                <img src="qrcode-recicla-sjp.png"
+                     onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=400x400&ecc=M&margin=6&data=https%3A%2F%2Fdiegosantosdev.github.io%2Frecicla-sjp%2F';"
+                     alt="QR Code Recicla SJP">
+                <div class="a6-url">diegosantosdev.github.io/recicla-sjp</div>
+            </div>
+            <footer class="a6-rodape">
+                <strong>♻️ Portal Recicla SJP</strong>
+                <span>Grátis • Sem baixar app</span>
+            </footer>
+        </div>
+    </article>
+
+    <script>
+        function selecionarModo(qtd) {
+            [1, 2, 4].forEach(n => {
+                document.getElementById('folha-' + n).classList.toggle('ativo', n === qtd);
+                document.getElementById('btn-modo-' + n).classList.toggle('ativo', n === qtd);
+            });
+        }
+    </script>
 </body>
 </html>
