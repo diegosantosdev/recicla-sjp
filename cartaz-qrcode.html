@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartaz & QR Code de Divulgação | Recicla SJP</title>
+    <style>
+        :root {
+            --emerald-900: #064e3b;
+            --emerald-800: #065f46;
+            --emerald-700: #047857;
+            --emerald-600: #059669;
+            --emerald-500: #10b981;
+            --emerald-100: #d1fae5;
+            --emerald-50: #ecfdf5;
+            --slate-900: #0f172a;
+            --slate-700: #334155;
+            --slate-500: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f1f5f9;
+            color: var(--slate-900);
+            padding: 24px 16px 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Barra de controle (Não sai na impressão) */
+        .painel-controle {
+            max-width: 210mm;
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .painel-info h1 {
+            font-size: 1.15rem;
+            color: var(--emerald-800);
+            margin-bottom: 4px;
+        }
+
+        .painel-info p {
+            font-size: 0.88rem;
+            color: var(--slate-500);
+        }
+
+        .painel-botoes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-imprimir {
+            background: var(--emerald-700);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(4, 120, 87, 0.25);
+        }
+
+        .btn-qr {
+            background: var(--emerald-50);
+            color: var(--emerald-800);
+            border: 1px solid #a7f3d0;
+        }
+
+        /* Folha A4 do Cartaz */
+        .folha-a4 {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+            padding: 16mm 18mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .faixa-topo {
+            background: linear-gradient(135deg, var(--emerald-900), var(--emerald-700));
+            color: #ffffff;
+            padding: 22px 26px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(6, 78, 59, 0.18);
+        }
+
+        .badge-cidade {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #ecfdf5;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 999px;
+            margin-bottom: 10px;
+        }
+
+        .faixa-topo h2 {
+            font-size: 2.05rem;
+            line-height: 1.15;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .faixa-topo p {
+            font-size: 1.05rem;
+            opacity: 0.95;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        /* Chamada principal */
+        .chamada-central {
+            text-align: center;
+            margin: 18px 0 12px;
+        }
+
+        .chamada-central h3 {
+            font-size: 1.55rem;
+            color: var(--emerald-900);
+            margin-bottom: 6px;
+        }
+
+        .chamada-central p {
+            font-size: 1rem;
+            color: var(--slate-700);
+        }
+
+        /* Grid de benefícios */
+        .beneficios-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .beneficio-card {
+            background: var(--emerald-50);
+            border: 1.5px solid #a7f3d0;
+            border-radius: 14px;
+            padding: 13px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .beneficio-icone {
+            font-size: 1.65rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .beneficio-texto strong {
+            display: block;
+            font-size: 0.98rem;
+            color: var(--emerald-900);
+            margin-bottom: 2px;
+        }
+
+        .beneficio-texto span {
+            font-size: 0.85rem;
+            color: var(--slate-700);
+            line-height: 1.35;
+            display: block;
+        }
+
+        /* Área de Destaque do QR Code */
+        .qr-box-destaque {
+            background: #ffffff;
+            border: 3px dashed var(--emerald-600);
+            border-radius: 24px;
+            padding: 20px 24px;
+            margin: 14px auto;
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(5, 150, 105, 0.08);
+        }
+
+        .qr-instrucao-topo {
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--emerald-700);
+            background: var(--emerald-100);
+            padding: 5px 14px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
+
+        .qr-moldura {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 18px;
+            border: 2px solid var(--emerald-800);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .qr-moldura img {
+            width: 220px;
+            height: 220px;
+            display: block;
+        }
+
+        .qr-url-box {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--emerald-900);
+            margin-top: 4px;
+            word-break: break-all;
+        }
+
+        /* Rodapé do Cartaz */
+        .rodape-cartaz {
+            border-top: 2px solid #e2e8f0;
+            padding-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.84rem;
+            color: var(--slate-500);
+        }
+
+        .rodape-cartaz strong {
+            color: var(--emerald-800);
+        }
+
+        .ods-pill {
+            background: var(--emerald-50);
+            color: var(--emerald-800);
+            border: 1px solid #a7f3d0;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .painel-controle {
+                display: none !important;
+            }
+            .folha-a4 {
+                box-shadow: none;
+                border: none;
+                border-radius: 0;
+                width: 210mm;
+                height: 297mm;
+                padding: 14mm 16mm;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .folha-a4 {
+                width: 100%;
+                min-height: auto;
+                padding: 20px;
+            }
+            .beneficios-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Painel de controle superior (não aparece na impressão) -->
+    <div class="painel-controle">
+        <div class="painel-info">
+            <h1>🖨️ Cartaz Oficial de Divulgação com QR Code — Recicla SJP</h1>
+            <p>Pronto para imprimir em folha A4 e fixar em condomínios, murais, comércios ou próximo às lixeiras seletivas.</p>
+        </div>
+        <div class="painel-botoes">
+            <a class="btn btn-qr" href="qrcode-recicla-sjp.png" download="qrcode-recicla-sjp.png">
+                ⬇️ Baixar QR Code Puro (PNG 1000x1000px)
+            </a>
+            <button type="button" class="btn btn-imprimir" onclick="window.print()">
+                🖨️ Imprimir Cartaz A4 / Salvar PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Folha A4 Pronta para Impressão -->
+    <article class="folha-a4" aria-label="Cartaz de divulgação Recicla SJP">
+        <header class="faixa-topo">
+            <span class="badge-cidade">🌱 São José dos Pinhais • PR</span>
+            <h2>♻️ Qual é o dia do Caminhão da Reciclagem aqui no bairro?</h2>
+            <p>Consulte gratuitamente a agenda oficial de coleta, o mapa de Ecopontos e tire dúvidas sobre descarte pelo celular!</p>
+        </header>
+
+        <section class="chamada-central">
+            <h3>Tudo sobre Coleta Seletiva em SJP em um só lugar:</h3>
+            <p>Sem precisar baixar aplicativo — abre direto no navegador do seu celular.</p>
+        </section>
+
+        <section class="beneficios-grid">
+            <div class="beneficio-card">
+                <div class="beneficio-icone">🚛</div>
+                <div class="beneficio-texto">
+                    <strong>Agenda de Coleta por Bairro</strong>
+                    <span>Descubra os dias exatos da coleta seletiva e orgânica em mais de 70 bairros de SJP.</span>
+                </div>
+            </div>
+            <div class="beneficio-card">
+                <div class="beneficio-icone">📍</div>
+                <div class="beneficio-texto">
+                    <strong>Mapa de Ecopontos e PEVs</strong>
+                    <span>Saiba onde descartar móveis velhos, restos de poda, vidro, óleo usado, pilhas e eletrônicos.</span>
+                </div>
+            </div>
+            <div class="beneficio-card">
+                <div class="beneficio-icone">🔍</div>
+                <div class="beneficio-texto">
+                    <strong>Guia: O que é Reciclável?</strong>
+                    <span>Pesquise qualquer item (isopor, espelho, caixa de pizza, remédios) e veja na hora como descartar.</span>
+                </div>
+            </div>
+            <div class="beneficio-card">
+                <div class="beneficio-icone">🏅</div>
+                <div class="beneficio-texto">
+                    <strong>Desafio da Reciclagem</strong>
+                    <span>Teste seus conhecimentos no jogo interativo e emita seu Certificado de Mérito Ambiental!</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="qr-box-destaque">
+            <span class="qr-instrucao-topo">📱 Aponte a câmera do seu celular aqui</span>
+            <div class="qr-moldura">
+                <img src="qrcode-recicla-sjp.png"
+                     onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=600x600&ecc=M&margin=8&data=https%3A%2F%2Fdiegosantosdev.github.io%2Frecicla-sjp%2F';"
+                     alt="QR Code para acessar o portal Recicla SJP em https://diegosantosdev.github.io/recicla-sjp/">
+            </div>
+            <p style="font-size: 0.92rem; color: #334155; margin-bottom: 4px;">Ou acesse diretamente pelo link:</p>
+            <div class="qr-url-box">diegosantosdev.github.io/recicla-sjp</div>
+        </section>
+
+        <footer class="rodape-cartaz">
+            <div>
+                <strong>♻️ Portal Recicla SJP</strong> • Educação Ambiental, Cidadania e Economia Circular
+            </div>
+            <span class="ods-pill">🌍 ONU • ODS 11 &amp; ODS 12</span>
+        </footer>
+    </article>
+
+</body>
+</html>
